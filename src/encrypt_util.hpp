@@ -4,6 +4,8 @@
 /* Function Declarations */
 void sub_block(Eigen::Matrix<unsigned char, 4, 4> *);
 void row_shift(Eigen::Matrix<unsigned char, 4, 4> *);
+void mix_columns(Eigen::Matrix<unsigned char, 4, 4> *);
+unsigned char gmul(unsigned char, unsigned char);
 
 
 

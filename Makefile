@@ -16,7 +16,7 @@ main.o:  src/main.cpp src/decrypt_util.hpp src/encrypt_util.hpp
 # To create the object file counter.o, we need the source files
 # counter.c and counter.h:
 #
-decrypt_util.o:  src/decrypt_util.cpp src/decrypt_util.hpp 
+decrypt_util.o:  src/decrypt_util.cpp src/decrypt_util.hpp  src/encrypt_util.hpp
 	$(CC) $(CFLAGS) -c src/decrypt_util.cpp
 
 # To create the object file scanner.o, we need the source files

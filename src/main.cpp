@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
         printf("\n");
     } */
 
-    row_shift(&data_matrix);
+/*     row_shift(&data_matrix);
     printf("\nShifted Data:\n");
     for(int row = 0; row < 4; row++) {
         for (int col = 0; col < 4; col++) {
@@ -110,6 +110,24 @@ int main(int argc, char *argv[]) {
 
     row_shift_i(&data_matrix);
     printf("\nUnshifted Data:\n");
+    for(int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+            printf("%d ", data_matrix.array()(row, col));
+        }
+        printf("\n");
+    } */
+
+    mix_columns(&data_matrix);
+    printf("\nMixed Data:\n");
+    for(int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+            printf("%d ", data_matrix.array()(row, col));
+        }
+        printf("\n");
+    }
+
+    mix_columns_i(&data_matrix);
+    printf("\nUnmixed Data:\n");
     for(int row = 0; row < 4; row++) {
         for (int col = 0; col < 4; col++) {
             printf("%d ", data_matrix.array()(row, col));
