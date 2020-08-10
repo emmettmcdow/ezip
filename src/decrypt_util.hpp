@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <Eigen/Dense>
-#include "encrypt_util.hpp"
+#include "util.hpp"
 
 /* Function Declarations */
 void sub_block_i(Eigen::Matrix<unsigned char, 4, 4> *);

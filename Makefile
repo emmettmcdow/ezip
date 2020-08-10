@@ -1,7 +1,7 @@
 EXE=ezip
 CC=g++
-DEPS=src/encrypt_util.hpp src/decrypt_util.hpp src/main.hpp
-OBJ=encrypt_util.o decrypt_util.o main.o
+DEPS=src/encrypt_util.hpp src/decrypt_util.hpp src/main.hpp src/util.hpp
+OBJ=encrypt_util.o decrypt_util.o main.o util.o
 CFLAGS=-Wall -g0 -I -v
 
 main: $(OBJ)
@@ -10,7 +10,7 @@ main: $(OBJ)
 # To create the object file countwords.o, we need the source
 # files countwords.c, scanner.h, and counter.h:
 #
-main.o:  src/main.cpp src/decrypt_util.hpp src/encrypt_util.hpp 
+main.o:  src/main.cpp src/decrypt_util.hpp src/encrypt_util.hpp src/util.hpp
 	$(CC) $(CFLAGS) -c src/main.cpp
 
 # To create the object file counter.o, we need the source files
@@ -24,6 +24,9 @@ decrypt_util.o:  src/decrypt_util.cpp src/decrypt_util.hpp  src/encrypt_util.hpp
 #
 encrypt_util.o:  src/encrypt_util.cpp src/encrypt_util.hpp 
 	$(CC) $(CFLAGS) -c src/encrypt_util.cpp
+
+util.o:  src/util.cpp 
+	$(CC) $(CFLAGS) -c src/util.cpp
 
 clean: 
 	rm -rf $(EXE) *.o 
