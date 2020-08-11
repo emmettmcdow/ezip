@@ -2,7 +2,7 @@ EXE=ezip
 CC=g++
 DEPS=src/encrypt_util.hpp src/decrypt_util.hpp src/main.hpp src/util.hpp
 OBJ=encrypt_util.o decrypt_util.o main.o util.o
-CFLAGS=-Wall -g0 -I -v
+CFLAGS=-Wall -g -I -v
 
 main: $(OBJ)
 	$(CC) $(CFLAGS) -o $(EXE) $(OBJ)

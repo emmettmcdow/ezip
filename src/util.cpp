@@ -21,51 +21,70 @@ uint8_t sbox[] =  {
  ,0xe1 ,0xf8 ,0x98 ,0x11 ,0x69 ,0xd9 ,0x8e ,0x94 ,0x9b ,0x1e ,0x87 ,0xe9 ,0xce ,0x55 ,0x28 ,0xdf
  ,0x8c ,0xa1 ,0x89 ,0x0d ,0xbf ,0xe6 ,0x42 ,0x68 ,0x41 ,0x99 ,0x2d ,0x0f ,0xb0 ,0x54 ,0xbb ,0x16};
 
+unsigned int keys[44];
+
 unsigned int rot_word(unsigned int input) {
-    unsigned long int filter = 0xFF000000;
-    filter = (filter & input) >> 48;
-    unsigned long int nu = input;
-    nu = nu << 16;
-    return (nu & filter);
+    unsigned int filter = 0xFF000000;
+    filter = (filter & input) >> 24;
+    unsigned int nu = input;
+    nu = nu << 8;
+    //printf("\n%u", input);
+    //printf("\n%u", nu | filter);
+    return (nu | filter);
 }
 
 unsigned int sub_word(unsigned int input) {
-    unsigned long int filter_0 = 0x000000FF;    
-    unsigned long int filter_1 = 0x0000FF00;
-    unsigned long int filter_2 = 0x00FF0000; 
-    unsigned long int filter_3 = 0xFF000000;
+    unsigned int filter_0 = 0x000000FF;    
+    unsigned int filter_1 = 0x0000FF00;
+    unsigned int filter_2 = 0x00FF0000; 
+    unsigned int filter_3 = 0xFF000000;
 
+    //printf("\n%u", input);
+    //printf("\n%u", (filter_0 & input));
     filter_0 = sbox[(filter_0 & input)];
-    filter_1 = sbox[(filter_1 & input) >> 16];
-    filter_2 = sbox[(filter_2 & input) >> 32];
-    filter_3 = sbox[(filter_3 & input) >> 48];
+    filter_1 = sbox[(filter_1 & input) >> 8];
+    //printf("\n%u", filter_1 & input);
+    filter_2 = sbox[(filter_2 & input) >> 16];
+    //printf("\n%u", filter_2 & input);
+    filter_3 = sbox[(filter_3 & input) >> 24];
+    //printf("\n%u", filter_3 & input);
 
-    return (filter_0) &
-           ((filter_1) << 16) &
-           ((filter_2) << 32) &
-           ((filter_3) << 48);
+    return (filter_0) |
+           ((filter_1) << 8) |
+           ((filter_2) << 16) |
+           ((filter_3) << 24);
             
 }
 
 
-unsigned int* keygen(unsigned int original_key[4]) {
-    unsigned int keys[11];
+void keygen(unsigned int original_key[4]) {
     int N = 4;
-
-    for (int i = 0; i < 11; i++) {
+    int i = 0;
+    //unsigned int words[44];
+    while (i < 44){
         if (i < N) {
             keys[i] = original_key[i];
+            i++;
         } else if (i % N == 0) {
             keys[i] = keys[i - N] ^ (sub_word(rot_word(keys[i-1]))) ^ rc[i / N];
+            i+=1;
         } else if (i >= N && N > 6 && (i % N) == (4 % N)) {
-            printf("\n I REALLY SHOULDN'T BE HERE UNTIL MODIFIED!!!\n");
-            return NULL;
+            keys[i] = keys[i -N] ^ sub_word(keys[i-1]);
+            i++;
         } else {
             keys[i] = keys[i - N] ^ keys[i - 1];
+            i++;
         }
     }
+/*     for (int i = 0; i < 11; i++) {
+        keys[i] += (static_cast<__int128_t>(words[i])) << 96;
+        keys[i] += (static_cast<__int128_t>(words[4*i+1])) << 64;
+        keys[i] += (static_cast<__int128_t>(words[4*i+2])) << 32;
+        keys[i] += (static_cast<__int128_t>(words[4*i+3]));
 
-    return keys;
+    } */
+
+
 }
 
 unsigned char gmul(unsigned char a, unsigned char b) {
