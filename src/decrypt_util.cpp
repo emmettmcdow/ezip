@@ -1,6 +1,6 @@
 #include "decrypt_util.hpp"
 
-using namespace Eigen;
+//using namespace Eigen;
 
 uint8_t sbox_i[] ={ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb, 
                     0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb, 
@@ -19,8 +19,13 @@ uint8_t sbox_i[] ={ 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 
                     0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61, 
                     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d};
 
-
-void sub_block_i(Matrix<unsigned char, 4, 4> * input_matrix) {
+/**
+ * Inverse of sub_block
+ * Substitute each byte in the data-matrix for another in the Rijndael inverse S-block
+ * @param input_matrix data-matrix to be subbed
+ * 
+ */
+void sub_block_i(Eigen::Matrix<unsigned char, 4, 4> * input_matrix) {
     int new_value = -1;
     for (int row = 0; row < 4; row++) {
         for (int column = 0; column < 4; column++){
@@ -30,20 +35,31 @@ void sub_block_i(Matrix<unsigned char, 4, 4> * input_matrix) {
     }
 }
 
-void row_shift_i(Matrix<unsigned char, 4, 4> *input_matrix) {
-    Matrix<int, 4, 4> one_shift_s;
+/**
+ * Inverse of row_shift
+ * Shift the data-matrix in the following way
+ *     1 0 0 0 >> 0
+ *     0 1 0 0 >> 1
+ *     0 0 1 0 >> 2
+ *     0 0 0 1 >> 3
+ * 
+ * @param input_matrix matrix to be shifted
+ *     
+ */
+void row_shift_i(Eigen::Matrix<unsigned char, 4, 4> *input_matrix) {
+    Eigen::Matrix<int, 4, 4> one_shift_s;
     one_shift_s << 0, 0, 0, 1,
                  1, 0, 0, 0,
                  0, 1, 0, 0,
                  0, 0, 1, 0;
 
-    Matrix<int, 4, 4> two_shift_s;
+    Eigen::Matrix<int, 4, 4> two_shift_s;
     two_shift_s << 0, 0, 1, 0,
                  0, 0, 0, 1,
                  1, 0, 0, 0,
                  0, 1, 0, 0;
     
-    Matrix<int, 4, 4> three_shift_s;
+    Eigen::Matrix<int, 4, 4> three_shift_s;
     three_shift_s << 0, 1, 0, 0,
                    0, 0, 1, 0,
                    0, 0, 0, 1,
@@ -56,10 +72,20 @@ void row_shift_i(Matrix<unsigned char, 4, 4> *input_matrix) {
 
 }
 
+/**
+ * Inverse of mix_columns
+ * Mix the columns of the data matrix using the transformation matrix
+ *     14 11 13  9
+ *      9 14 11 13
+ *     13  9 14 11
+ *     11 13  9 14
+ * Multiply according the the Galois field
+ * @param input_matrix data-matrix to be mixed
+ * 
+ */
+void mix_columns_i(Eigen::Matrix<unsigned char, 4, 4> *input_matrix) {
 
-void mix_columns_i(Matrix<unsigned char, 4, 4> *input_matrix) {
-
-    Matrix<unsigned char, 4, 4> a = *input_matrix;
+    Eigen::Matrix<unsigned char, 4, 4> a = *input_matrix;
     for (int c = 0; c < 4; c++) {
 
         input_matrix->array()(0, c) = gmul(a.array()(0,c),14) ^ gmul(a.array()(3,c),9) ^ gmul(a.array()(2,c),13) ^ gmul(a.array()(1,c),11);

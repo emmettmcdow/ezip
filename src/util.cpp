@@ -1,5 +1,7 @@
 #include "util.hpp"
-using namespace Eigen;
+//using namespace Eigen;
+#include <list> 
+#include <iterator>
 
 unsigned char rc[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
 
@@ -22,7 +24,14 @@ uint8_t sbox[] =  {
  ,0x8c ,0xa1 ,0x89 ,0x0d ,0xbf ,0xe6 ,0x42 ,0x68 ,0x41 ,0x99 ,0x2d ,0x0f ,0xb0 ,0x54 ,0xbb ,0x16};
 
 unsigned int keys[44];
+unsigned int curr_round;
 
+/**
+ * Singular circular left shift on a word
+ * @param input Word to be rotated
+ * @return Rotated word
+ * 
+ */
 unsigned int rot_word(unsigned int input) {
     unsigned int filter = 0xFF000000;
     filter = (filter & input) >> 24;
@@ -33,6 +42,11 @@ unsigned int rot_word(unsigned int input) {
     return (nu | filter);
 }
 
+/**
+ * Substitutes every byte in the inputted word with a byte from Rijndael's S-Box
+ * @param input byte to be replaced
+ * @return replaced word
+ */ 
 unsigned int sub_word(unsigned int input) {
     unsigned int filter_0 = 0x000000FF;    
     unsigned int filter_1 = 0x0000FF00;
@@ -56,7 +70,11 @@ unsigned int sub_word(unsigned int input) {
             
 }
 
-
+/**
+ * Generate 10 round keys from original key
+ * @param original_key inputted original key
+ * 
+ */
 void keygen(unsigned int original_key[4]) {
     int N = 4;
     int i = 0;
@@ -87,6 +105,12 @@ void keygen(unsigned int original_key[4]) {
 
 }
 
+/**
+ * Galois Field Multiplication
+ * @param a first term in the multiplication
+ * @param b second term in the multiplication
+ * @return product of a*b
+ */
 unsigned char gmul(unsigned char a, unsigned char b) {
 	unsigned char p = 0;
 	unsigned char counter;
@@ -101,4 +125,186 @@ unsigned char gmul(unsigned char a, unsigned char b) {
 		b >>= 1;
 	}
 	return p;
+}
+
+/**
+ * Adds the current round key to a single data-matrix
+ * @param *input pointer to the single data-matrix
+ * 
+ */
+void add_round_key(Eigen::Matrix<unsigned char, 4, 4> *input) {
+    int cri = 4*curr_round;
+    for (int i = 0; i < 4; i++) {
+        cri += i;
+        input->array()(i, 0) ^= (keys[(cri)] & 0xFF000000) >> 24;
+        input->array()(i, 1) ^= (keys[(cri)] & 0x00FF0000) >> 16;
+        input->array()(i, 2) ^= (keys[(cri)] & 0x0000FF00) >> 8;
+        input->array()(i, 3) ^= (keys[(cri)] & 0x000000FF);
+    }
+}
+/**
+ * Yuq
+ * 
+ */
+void d_and_e(Eigen::Matrix<unsigned char, 4, 4> *input, unsigned int original_key[4]) {
+    printf("\n Pre Xor Round Keys\n");
+    for(int r = 0; r < 4; r++) {
+        for(int c = 0; c < 4; c++) {
+            std::cout << std::hex << input->array()(r,c);
+        }
+        printf("\n");
+    }
+
+    keygen(original_key);
+    for (int i = 0; i < 10; i++) {
+        add_round_key(input);
+    }
+
+    printf("\n Post Xor Round Keys\n");
+    for(int r = 0; r < 4; r++) {
+        for(int c = 0; c < 4; c++) {
+            std::cout << std::hex << input->array()(r,c);
+        }
+        printf("\n");
+    }
+
+    for (int i = 9; i != -1; i--) {
+        add_round_key(input);
+    }
+
+    printf("\n Post Xor Round Keys (2x) \n");
+    for(int r = 0; r < 4; r++) {
+        for(int c = 0; c < 4; c++) {
+            std::cout << std::hex << input->array()(r,c);
+        }
+        printf("\n");
+    }
+
+}
+
+/**
+ * Helpter function to print all of the data in the list of data-matrices provided
+ * @param matrix_list list of all the data-matrices
+ * 
+ */
+void print_list(std::list <Eigen::Matrix<unsigned char, 4, 4>> matrix_list) { 
+
+    std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
+    for(it = matrix_list.begin(); it != matrix_list.end(); ++it) {
+        for(int r = 0; r < 4; r++) {
+            for(int c = 0; c < 4; c++) {
+                std::cout << std::hex << it->array()(r,c);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+}
+
+/**
+ * Helper function to parse and store the inputted key
+ * @param key_loc pointer to the string representing the location of the key
+ * @return the processed original key
+ */
+unsigned int* parse_key(char* key_loc) {
+    std::fstream ink;
+
+    ink.open(key_loc, std::ifstream::in);
+    if (ink.fail()) {
+        printf("\nFailed to open key\n");
+        return NULL;
+    }
+
+    std::string byte;
+    std::string str = "";
+    std::regex valid ("[A-F0-9]*");
+    printf("\n Original Data: \n");
+    while(ink.good()) {
+        ink >> byte;
+
+        std::cout << std::hex << byte << std::endl;
+
+        str.append(byte);
+
+    }
+    ink.close();
+
+    if (!std::regex_match(str, valid)) {
+        printf("\n INVALID KEY\n");
+        return -1;
+    }
+
+    unsigned int *newkey = new unsigned int[4];
+    newkey[0] = std::stol(str.substr(0,8), 0, 16);
+    newkey[1] = std::stol(str.substr(8,8), 0, 16);
+    newkey[2] = std::stol(str.substr(16,8), 0, 16);
+    newkey[3] = std::stol(str.substr(24,8), 0, 16);
+
+    return newkey;
+}
+/**
+ * Helper function to parse file
+ * @param data_loc pointer to string representing the location of data
+ * @return data in data-matrix-list form
+ * 
+ */
+std::list <Eigen::Matrix<unsigned char, 4, 4>>* parse_file(char *data_loc) {
+    std::fstream inf;
+    inf.open(data_loc, std::ifstream::in);
+    if (inf.fail()) {
+        printf("\nFailed to open key\n");
+        return NULL;
+    }
+
+    curr_round = 0;
+    unsigned char byte;
+    std::list <Eigen::Matrix<unsigned char, 4, 4>> rtn;
+    rtn.push_back(Eigen::Matrix<unsigned char, 4, 4>());
+    int row = 0;
+    int col = 0;
+
+    while(inf.good()) {
+        inf >> byte;
+
+        rtn.back().array()(row, col) = byte;
+
+        col += 1;
+        if (col > 3) {
+            row += 1;
+            col = 0;
+        }
+        if (row > 3) {
+            row = 0;
+            col = 0;
+            rtn.push_back(Eigen::Matrix<unsigned char, 4, 4>());
+        }
+    }
+    inf.close();
+
+    while (row != 0 || col != 0) {
+        rtn.back().array()(row, col) = (unsigned char)48;
+        col += 1;
+        if (col > 3) {
+            row +=1;
+            col = 0;
+        }
+        if (row > 3) {
+            row = 0;
+            col = 0;
+        }
+    }
+
+    return &rtn;
+}
+/**
+ * Helper Function to print the keys 
+ * 
+ */
+void print_keys() {
+    printf("\n\n Generated Keys: \n");
+    for (int i = 0; i < 44; i += 1) {
+        std::cout <<" "<< std::setw(8) << std::setfill('0') << std::hex << static_cast<int>(keys[i]);
+        if ((i + 1) % 4 == 0) {printf("\n");};
+    }
+    printf("\n");
 }
