@@ -8,3 +8,5 @@
 
 #include <list> 
 #include <iterator> 
+
+void d_and_e(unsigned int[4]);

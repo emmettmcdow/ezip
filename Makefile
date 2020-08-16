@@ -25,7 +25,7 @@ decrypt_util.o:  src/decrypt_util.cpp src/decrypt_util.hpp  src/encrypt_util.hpp
 encrypt_util.o:  src/encrypt_util.cpp src/encrypt_util.hpp 
 	$(CC) $(CFLAGS) -c src/encrypt_util.cpp
 
-util.o:  src/util.cpp 
+util.o:  src/util.cpp
 	$(CC) $(CFLAGS) -c src/util.cpp
 
 clean: 

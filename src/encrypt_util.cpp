@@ -74,3 +74,11 @@ void mix_columns(Eigen::Matrix<unsigned char, 4, 4> *input_matrix) {
     }
 
 }
+
+void encrypt_round(Eigen::Matrix<unsigned char, 4, 4> *input_matrix, int round){
+    if (round == 0) { add_round_key(input_matrix, round); };
+    sub_block(input_matrix);
+    row_shift(input_matrix);
+    if (round != 9) { mix_columns(input_matrix); };
+    add_round_key(input_matrix, round);
+}
