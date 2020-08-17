@@ -24,6 +24,7 @@ uint8_t sbox[] =  {
  ,0x8c ,0xa1 ,0x89 ,0x0d ,0xbf ,0xe6 ,0x42 ,0x68 ,0x41 ,0x99 ,0x2d ,0x0f ,0xb0 ,0x54 ,0xbb ,0x16};
 
 unsigned int keys[40];
+unsigned int ogkey[4];
 unsigned int curr_round;
 std::list <Eigen::Matrix<unsigned char, 4, 4>> data_mtx;
 
@@ -76,13 +77,13 @@ unsigned int sub_word(unsigned int input) {
  * @param original_key inputted original key
  * 
  */
-void keygen(unsigned int original_key[4]) {
+void keyexp() {
     int N = 4;
     int i = 0;
     //unsigned int words[44];
     while (i < 40){
         if (i < N) {
-            keys[i] = original_key[i];
+            keys[i] = ogkey[i];
             i++;
         } else if (i % N == 0) {
             keys[i] = keys[i - N] ^ (sub_word(rot_word(keys[i-1]))) ^ rc[i / N];
@@ -156,7 +157,7 @@ void print_list(std::list <Eigen::Matrix<unsigned char, 4, 4>> matrix_list) {
     for(it = matrix_list.begin(); it != matrix_list.end(); ++it) {
         for(int r = 0; r < 4; r++) {
             for(int c = 0; c < 4; c++) {
-                std::cout << std::hex << it->array()(r,c);
+                std::cout  <<" "<< std::setw(2) << std::setfill('0') << std::hex << static_cast<int> (it->array()(r,c));
             }
             printf("\n");
         }
@@ -181,11 +182,11 @@ unsigned int* parse_key(char* key_loc) {
     std::string byte;
     std::string str = "";
     std::regex valid ("[A-F0-9]*");
-    printf("\n Original Data: \n");
+    //printf("\n Original Data: \n");
     while(ink.good()) {
         ink >> byte;
 
-        std::cout << std::hex << byte << std::endl;
+        //std::cout << std::hex << byte << std::endl;
 
         str.append(byte);
 
@@ -202,6 +203,7 @@ unsigned int* parse_key(char* key_loc) {
     newkey[1] = std::stol(str.substr(8,8), 0, 16);
     newkey[2] = std::stol(str.substr(16,8), 0, 16);
     newkey[3] = std::stol(str.substr(24,8), 0, 16);
+    std::cout <<"\n Input Key: "<< newkey[0] << newkey[1] << newkey[2] << newkey[3] << std::endl;
 
     return newkey;
 }
@@ -211,24 +213,27 @@ unsigned int* parse_key(char* key_loc) {
  * @return data in data-matrix-list form
  * 
  */
-std::list <Eigen::Matrix<unsigned char, 4, 4>>* parse_file(char *data_loc) {
-    std::fstream inf;
-    inf.open(data_loc, std::ifstream::in);
+long long parse_file(char *data_loc) {
+    std::ifstream inf;
+    inf.open(data_loc, std::ios::binary);
     if (inf.fail()) {
 
-        return NULL;
+        return -1;
     }
 
     curr_round = 0;
-    unsigned char byte;
+    char byte;
     data_mtx.push_back(Eigen::Matrix<unsigned char, 4, 4>());
     int row = 0;
     int col = 0;
+    long long count = 0;
 
-    while(inf.good()) {
-        inf >> byte;
 
-        data_mtx.back().array()(row, col) = byte;
+
+    while(true){
+        inf.read(&byte, 1);
+        if (inf.eof()) break;
+        data_mtx.back().array()(row, col) = (unsigned char) byte;
 
         col += 1;
         if (col > 3) {
@@ -240,22 +245,31 @@ std::list <Eigen::Matrix<unsigned char, 4, 4>>* parse_file(char *data_loc) {
             col = 0;
             data_mtx.push_back(Eigen::Matrix<unsigned char, 4, 4>());
         }
+
+        count += 1;
+        
     }
     inf.close();
-
-    while (row != 0 || col != 0) {
-        data_mtx.back().array()(row, col) = (unsigned char)48;
-        col += 1;
-        if (col > 3) {
-            row +=1;
-            col = 0;
-        }
-        if (row > 3) {
-            row = 0;
-            col = 0;
+    if (row == 0 && col == 0) {
+        data_mtx.pop_back();
+    } else {
+        while (row != 0 || col != 0) {
+            data_mtx.back().array()(row, col) = (unsigned char)48;
+            col += 1;
+            if (col > 3) {
+                row +=1;
+                col = 0;
+            }
+            if (row > 3) {
+                row = 0;
+                col = 0;
+            }
         }
     }
-    return &data_mtx;
+
+
+
+    return count;
 }
 /**
  * Helper Function to print the keys 
@@ -268,4 +282,51 @@ void print_keys() {
         if ((i + 1) % 4 == 0) {printf("\n");};
     }
     printf("\n");
+}
+
+void add_metadata(std::list<Eigen::Matrix<unsigned char, 4, 4>> list, long long count) {
+    long long filter = 0xFF00000000000000;
+    int shift = 56;
+    data_mtx.push_back(Eigen::Matrix<unsigned char, 4,4>());
+    for (int i = 0; i < 8; i++) {
+        data_mtx.back().array()(i/4, i%4) = (count & filter) >> shift;
+        data_mtx.back().array()(i/4 + 2, i%4) = (unsigned char)0;
+        shift -= 8;
+        filter = filter >> 8;
+    }
+}
+
+unsigned long long parse_metadata() {
+    unsigned long long rtn = 0;
+    int shift = 56;
+    for (int i = 0; i < 8; i++) {
+        printf("\n length: %d", rtn);
+        unsigned long long value = static_cast<int>(data_mtx.back().array()(i/4, i%4));
+        printf("\nValue %d", value);
+        rtn += value << shift;
+        shift -= 8;
+    }
+    printf("\n length: %d", rtn);
+    return rtn;
+}
+
+
+void keygen(std::string nom) {
+    ogkey[0] = 0;
+    ogkey[1] = 0;
+    ogkey[2] = 0;
+    ogkey[3] = 0;
+
+    namespace fs = boost::filesystem;
+    fs::path pth{nom};
+
+    pth = pth.filename();
+    std::string name = pth.string();
+    std::ofstream keyfile(name.append(".key"));
+
+    // Write to the file
+    keyfile << std::hex << "00000000000000000000000000000000";
+
+    // Close the file
+    keyfile.close();
 }

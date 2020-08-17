@@ -100,6 +100,6 @@ void decrypt_round(Eigen::Matrix<unsigned char, 4, 4> *input_matrix, int round){
     add_round_key(input_matrix, round);
     if (round != 9) { mix_columns_i(input_matrix); };
     row_shift_i(input_matrix);
-    sub_block_i(input_matrix);
+    sub_block_i(input_matrix);  
     if (round == 0) { add_round_key(input_matrix, round); };
 }

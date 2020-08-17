@@ -55,9 +55,18 @@ int main(int argc, char *argv[]) {
     if (*operation == 'k'){
 
     } else if (*operation == 'b') {
-        printf("\nI um made it here daddi -1");
         parse_file(data_loc);
         d_and_e(parse_key(key_loc));
+    } else if (*operation == 'e') {
+        long long cnt = parse_file(data_loc);
+        add_metadata(data_mtx, cnt);
+        std::string s(data_loc, strlen(data_loc));
+        encrypt(s);
+    } else if (*operation == 'd') {
+        long long cnt = parse_file(data_loc);
+        std::string s(data_loc, strlen(data_loc));
+        parse_key(key_loc);
+        decrypt(s);
     }
 
 
@@ -68,38 +77,114 @@ int main(int argc, char *argv[]) {
  * 
  */
 void d_and_e(unsigned int original_key[4]) {
-    printf("\n Unencrypted Data \n");
-    for(int r = 0; r < 4; r++) {
-        for(int c = 0; c < 4; c++) {
-            std::cout << std::hex << data_mtx.front().array()(r,c);
-        }
-        printf("\n");
-    }
+    std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
 
-    keygen(original_key);
+    printf("\n Unencrypted Data \n");
+    print_list(data_mtx);
+
+    keyexp();
     print_keys();
-    for (int i = 0; i < 10; i++) {
-        encrypt_round(&(data_mtx.front()), i);
+    for(it = data_mtx.begin(); it != data_mtx.end(); ++it) {
+        Eigen::Matrix<unsigned char, 4, 4>* curr = &(*it);
+        for (int i = 0; i < 10; i++) {
+            encrypt_round(curr, i);
+        }
     }
 
     printf("\n Encrypted Data \n");
-    for(int r = 0; r < 4; r++) {
-        for(int c = 0; c < 4; c++) {
-            std::cout << std::hex << data_mtx.front().array()(r,c);
-        }
-        printf("\n");
-    }
+    print_list(data_mtx);
 
-    for (int i = 9; i != -1; i--) {
-        decrypt_round(&(data_mtx.front()), i);
+    for(it = data_mtx.begin(); it != data_mtx.end(); ++it) {
+        Eigen::Matrix<unsigned char, 4, 4>* curr = &(*it);
+        for (int i = 9; i != -1; i--) {
+            decrypt_round(curr, i);
+        }
     }
 
     printf("\n Decrypted Data \n");
-    for(int r = 0; r < 4; r++) {
-        for(int c = 0; c < 4; c++) {
-            std::cout << std::hex << data_mtx.front().array()(r,c);
+    print_list(data_mtx);
+
+}
+
+/**
+ * Yuq
+ * 
+ */
+void encrypt(std::string name) {
+    std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
+
+    printf("\n Unencrypted Data \n");
+    print_list(data_mtx);
+    keygen(name);
+    keyexp();
+    namespace fs = boost::filesystem;
+
+    fs::path pth{name};
+    pth = pth.filename();
+    std::string newname = pth.string();
+    newname = newname.append(".ezip");
+    std::ofstream datafile(newname);
+
+    for(it = data_mtx.begin(); it != data_mtx.end(); ++it) {
+        Eigen::Matrix<unsigned char, 4, 4>* curr = &(*it);
+        for (int i = 0; i < 10; i++) {
+            encrypt_round(curr, i);
         }
-        printf("\n");
+
+        for(int r = 0; r < 4; r++) {
+            for(int c = 0; c < 4; c++) {
+                datafile  << it->array()(r,c);
+            }
+        }
+
     }
+    printf("\n Encrypted Data\n");
+    print_list(data_mtx);
+
+    datafile.close();
+}
+
+void decrypt(std::string name) {
+    std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
+
+    printf("\n Encrypted Data \n");
+    print_list(data_mtx);
+    keyexp();
+    print_keys();
+    namespace fs = boost::filesystem;
+
+    fs::path pth{name};
+    pth = pth.filename();
+    std::string newname = pth.string();
+    newname = newname.substr(0, newname.length() - 5);
+    std::ofstream datafile(newname);
+
+    unsigned long long count = 0;
+    char * byte;
+
+    for(it = data_mtx.begin(); it != data_mtx.end(); ++it) {
+        Eigen::Matrix<unsigned char, 4, 4>* curr = &(*it);
+        for (int i = 9; i != -1; i--) {
+            decrypt_round(curr, i);
+        }
+    }
+    unsigned long long length = parse_metadata();
+    for(it = data_mtx.begin(); it != data_mtx.end(); ++it) {
+        Eigen::Matrix<unsigned char, 4, 4>* curr = &(*it);
+        for(int r = 0; r < 4; r++) {
+            for(int c = 0; c < 4; c++) {
+                if (count < length) {
+                    count += 1;
+                    byte = (char *)&(it->array()(r,c));
+                    datafile.write((byte), 1);
+                }
+            }
+        }
+    }
+
+    printf("\n Unencrypted Data \n");
+    print_list(data_mtx);
+
+    datafile.close();
 
 }

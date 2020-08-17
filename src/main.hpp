@@ -10,3 +10,5 @@
 #include <iterator> 
 
 void d_and_e(unsigned int[4]);
+void encrypt(std::string);
+void decrypt(std::string);
