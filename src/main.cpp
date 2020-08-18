@@ -73,8 +73,9 @@ int main(int argc, char *argv[]) {
 }
 
 /**
- * Yuq
+ * Decryption and Encryption (for Debugging)
  * 
+ * @param original_key oops
  */
 void d_and_e(unsigned int original_key[4]) {
     std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
@@ -107,14 +108,16 @@ void d_and_e(unsigned int original_key[4]) {
 }
 
 /**
- * Yuq
+ * Helper function to perform encryption
+ * 
+ * @param name name of input file
  * 
  */
 void encrypt(std::string name) {
-    std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
+    std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it;
+    clock_t t;
+    t = clock();
 
-    printf("\n Unencrypted Data \n");
-    print_list(data_mtx);
     keygen(name);
     keyexp();
     namespace fs = boost::filesystem;
@@ -124,8 +127,10 @@ void encrypt(std::string name) {
     std::string newname = pth.string();
     newname = newname.append(".ezip");
     std::ofstream datafile(newname);
+    long long length = 0;
 
     for(it = data_mtx.begin(); it != data_mtx.end(); ++it) {
+        length += 16;
         Eigen::Matrix<unsigned char, 4, 4>* curr = &(*it);
         for (int i = 0; i < 10; i++) {
             encrypt_round(curr, i);
@@ -138,19 +143,25 @@ void encrypt(std::string name) {
         }
 
     }
-    printf("\n Encrypted Data\n");
-    print_list(data_mtx);
+
 
     datafile.close();
+    t = clock() - t;
+    printf("\n Encrypted ~%d Bytes in %f seconds\n", length, (float)t/CLOCKS_PER_SEC);
 }
 
+/**
+ * Helper function to perform decryption 
+ * 
+ * @param name name of the input file
+ */
 void decrypt(std::string name) {
+    clock_t t;
+    t = clock();
+    printf("\nEncrypting...\n");
     std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
 
-    printf("\n Encrypted Data \n");
-    print_list(data_mtx);
     keyexp();
-    print_keys();
     namespace fs = boost::filesystem;
 
     fs::path pth{name};
@@ -182,9 +193,8 @@ void decrypt(std::string name) {
         }
     }
 
-    printf("\n Unencrypted Data \n");
-    print_list(data_mtx);
 
     datafile.close();
-
+    t = clock() - t;
+    printf("\n Decrypted %d Bytes in %f seconds\n", length, (float)t/CLOCKS_PER_SEC);
 }

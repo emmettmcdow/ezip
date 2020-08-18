@@ -283,7 +283,13 @@ void print_keys() {
     }
     printf("\n");
 }
-
+/**
+ * Adds metadata to the data_matrix. This metadata contains the length of the encrypted data.
+ * 
+ * @param list data_matrix to use
+ * @param count length of the data in bytes
+ * 
+ */
 void add_metadata(std::list<Eigen::Matrix<unsigned char, 4, 4>> list, long long count) {
     long long filter = 0xFF00000000000000;
     int shift = 56;
@@ -296,13 +302,18 @@ void add_metadata(std::list<Eigen::Matrix<unsigned char, 4, 4>> list, long long 
     }
 }
 
+/**
+ * Parses the metadata at the end of the encrypted file. This will result in the length
+ * in bytes of the data_matrix 
+ * 
+ * @return the length in bytes of the data matrix
+ * 
+ */
 unsigned long long parse_metadata() {
     unsigned long long rtn = 0;
     int shift = 56;
     for (int i = 0; i < 8; i++) {
-        printf("\n length: %d", rtn);
         unsigned long long value = static_cast<int>(data_mtx.back().array()(i/4, i%4));
-        printf("\nValue %d", value);
         rtn += value << shift;
         shift -= 8;
     }
@@ -310,7 +321,11 @@ unsigned long long parse_metadata() {
     return rtn;
 }
 
-
+/**
+ * Generates a key to use
+ * 
+ * @param nom name to use for the output file.
+ */
 void keygen(std::string nom) {
     ogkey[0] = 0;
     ogkey[1] = 0;

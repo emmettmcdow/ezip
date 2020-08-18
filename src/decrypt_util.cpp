@@ -95,7 +95,12 @@ void mix_columns_i(Eigen::Matrix<unsigned char, 4, 4> *input_matrix) {
 
     }
 }
-
+/**
+ * Helper function to decrypt for a singular round 
+ * 
+ * @param input_matrix particular data matrix to perform decryption on
+ * @param round round of decryption
+ */
 void decrypt_round(Eigen::Matrix<unsigned char, 4, 4> *input_matrix, int round){
     add_round_key(input_matrix, round);
     if (round != 9) { mix_columns_i(input_matrix); };

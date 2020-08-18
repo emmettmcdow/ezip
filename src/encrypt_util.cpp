@@ -75,6 +75,12 @@ void mix_columns(Eigen::Matrix<unsigned char, 4, 4> *input_matrix) {
 
 }
 
+/**
+ * Helper function to encrypt for a singular round 
+ * 
+ * @param input_matrix particular data matrix to perform encryption on
+ * @param round round of encryption
+ */
 void encrypt_round(Eigen::Matrix<unsigned char, 4, 4> *input_matrix, int round){
     if (round == 0) { add_round_key(input_matrix, round); };
     sub_block(input_matrix);
