@@ -53,7 +53,7 @@ is multiplied by the matrix and we get a new column d to put in its place.
 #### Add Round Key
 Add Round Key is the step that makes sure that no two cyphers are ever the same. We take our original
 key, and expand it a number of times equal to the number of steps of encryption we have. We
-expand it in this way. <br/> ![](https://user-images.githubusercontent.com/24411516/90669377-90d58f80-e21f-11ea-83f3-d3882eafc083.png) <br/>![](https://user-images.githubusercontent.com/24411516/90670066-a1d2d080-e220-11ea-914c-fff0191b439f.png) <br/> RotWord is loosely equivalent to the rotation in shift rows' second row. And
+expand it in this way. <br/> ![](https://user-images.githubusercontent.com/24411516/90669377-90d58f80-e21f-11ea-83f3-d3882eafc083.png) <br/>![](https://user-images.githubusercontent.com/24411516/90670066-a1d2d080-e220-11ea-914c-fff0191b439f.png) <br/> ![](https://user-images.githubusercontent.com/24411516/90671128-4275c000-e222-11ea-8959-109b7a7aa1d9.png) <br/>RotWord is loosely equivalent to the rotation in shift rows' second row. And
 SubWord uses the S-box to replace each byte with one from the S-box.For each of the rounds we xor the round key
 with each word of our data. That way different keys result in 
 different cypher text, in addition to the generous mixing and replacing we outlined above.
