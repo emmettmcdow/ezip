@@ -31,7 +31,7 @@ scramble up our data.
 For ezip, we use 128-bit encryption, which simply put means that we will run 10 rounds of our
 operations. This also means that to decrypt, we will simply do the reverse order inverse of those
 operations. We also want to put our data into blocks of 16-bytes, represented as a 4x4 matrix
-of bytes. [insert image]
+of bytes.
 #### Substitute Bytes
 Fun fact, AES is a specific implementation of a protocol named Rijndael, created by 
 [Vincent Rijmen](https://en.wikipedia.org/wiki/Vincent_Rijmen) and [Joan Daemen](https://en.wikipedia.org/wiki/Joan_Daemen).
@@ -42,18 +42,18 @@ really smart math that is behind it that assures that your data is properly mixe
 can  read about it [here](https://en.wikipedia.org/wiki/Rijndael_S-box). 
 #### Shift Rows
 Shift rows is pretty straightforward because we simply shift each of the rows of the data
-matrix by a preset amount. The first row we shift 0 times, the second 1 time, and so on. [insert image]
+matrix by a preset amount. The first row we shift 0 times, the second 1 time, and so on. ![](https://user-images.githubusercontent.com/24411516/90669331-7dc2bf80-e21f-11ea-89d5-4e601f5ff0d3.png)
 #### Mix Columns
 Mix Columns is in my opinion one of the more complicated parts of the whole AES algorithm. I will
 do my best to explain in layman's terms, but [here](https://en.wikipedia.org/wiki/Rijndael_MixColumns)
 is a link to an explanation in more detail. Essentially we are multiplying our data matrix by
 a preset 4x4 matrix. Instead of addition, we use a xor, and instead of multiplication we use
-multiplication over the Galois Field G(F^8). [insert image] In this example, the column corresponding to b
+multiplication over the Galois Field G(F^8). ![](https://user-images.githubusercontent.com/24411516/90670130-bc0cae80-e220-11ea-9794-3ebd3d40810d.png) In this example, the column corresponding to b
 is multiplied by the matrix and we get a new column d to put in its place.
 #### Add Round Key
 Add Round Key is the step that makes sure that no two cyphers are ever the same. We take our original
 key, and expand it a number of times equal to the number of steps of encryption we have. We
-expand it in this way. [insert image] [insert image] RotWord is loosely equivalent to the rotation in shift rows' second row. And
+expand it in this way. ![](https://user-images.githubusercontent.com/24411516/90669331-7dc2bf80-e21f-11ea-89d5-4e601f5ff0d3.png) ![](https://user-images.githubusercontent.com/24411516/90669384-94691680-e21f-11ea-9a54-ad8c660cadf0.png) RotWord is loosely equivalent to the rotation in shift rows' second row. And
 SubWord uses the S-box to replace each byte with one from the S-box.For each of the rounds we xor the round key
 with each word of our data. That way different keys result in 
 different cypher text, in addition to the generous mixing and replacing we outlined above.
