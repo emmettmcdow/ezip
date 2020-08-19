@@ -48,12 +48,12 @@ Mix Columns is in my opinion one of the more complicated parts of the whole AES 
 do my best to explain in layman's terms, but [here](https://en.wikipedia.org/wiki/Rijndael_MixColumns)
 is a link to an explanation in more detail. Essentially we are multiplying our data matrix by
 a preset 4x4 matrix. Instead of addition, we use a xor, and instead of multiplication we use
-multiplication over the Galois Field G(F^8). ![](https://user-images.githubusercontent.com/24411516/90670130-bc0cae80-e220-11ea-9794-3ebd3d40810d.png) In this example, the column corresponding to b
+multiplication over the Galois Field G(F^8).\ ![](https://user-images.githubusercontent.com/24411516/90670130-bc0cae80-e220-11ea-9794-3ebd3d40810d.png) In this example, the column corresponding to b
 is multiplied by the matrix and we get a new column d to put in its place.
 #### Add Round Key
 Add Round Key is the step that makes sure that no two cyphers are ever the same. We take our original
 key, and expand it a number of times equal to the number of steps of encryption we have. We
-expand it in this way. ![](https://user-images.githubusercontent.com/24411516/90669377-90d58f80-e21f-11ea-83f3-d3882eafc083.png) ![](https://user-images.githubusercontent.com/24411516/90670066-a1d2d080-e220-11ea-914c-fff0191b439f.png) RotWord is loosely equivalent to the rotation in shift rows' second row. And
+expand it in this way. \ ![](https://user-images.githubusercontent.com/24411516/90669377-90d58f80-e21f-11ea-83f3-d3882eafc083.png) ![](https://user-images.githubusercontent.com/24411516/90670066-a1d2d080-e220-11ea-914c-fff0191b439f.png) RotWord is loosely equivalent to the rotation in shift rows' second row. And
 SubWord uses the S-box to replace each byte with one from the S-box.For each of the rounds we xor the round key
 with each word of our data. That way different keys result in 
 different cypher text, in addition to the generous mixing and replacing we outlined above.
