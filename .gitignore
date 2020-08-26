@@ -1,9 +1,9 @@
 *.o
 ezip
 .vscode
-*.txt
 *.png
 *.jpg
 *.ezip
 *.key
 build
+.DS_Store
