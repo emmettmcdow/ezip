@@ -1,4 +1,4 @@
-#include "util.hpp"
+#include "../include/util.hpp"
 //using namespace Eigen;
 #include <list> 
 #include <iterator>

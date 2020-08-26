@@ -1,5 +1,5 @@
 //#include <stdint.h>
-#include "encrypt_util.hpp"
+#include "../include/encrypt_util.hpp"
 
 /**
  * Substitute each byte in the data-matrix for another in the Rijndael S-block
