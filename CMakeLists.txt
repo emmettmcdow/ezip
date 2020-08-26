@@ -14,7 +14,7 @@ include_directories(include)
 
 set(SOURCES src/driver.cpp src/util.cpp src/decrypt_util.cpp src/encrypt_util.cpp)
 
-find_package(Boost 1.73 REQUIRED COMPONENTS filesystem)
+find_package(Boost 1.6 REQUIRED COMPONENTS filesystem)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 include_directories(${CMAKE_SOURCE_DIR})
