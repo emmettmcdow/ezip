@@ -1,9 +1,14 @@
 # ezip
 AES Encrypion and Compression 
 ### Installation
+Firstly install some dependencies. You will need [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page), and [Boost](https://www.boost.org). Also make sure that you can run C++17 and have make, and cmake installed. Then run this
 ```bash
-snowden@NSA:~$ make main
+snowden@NSA:~/ezip$ mkdir build
+snowden@NSA:~/ezip$ cd build
+snowden@NSA:~/ezip/build$ cmake ..
+snowden@NSA:~/ezip/build$ make ..
 ```
+Then you should be able to run ezip from your build folder.
 ### Usage
 Encryption is simple with ezip. Just use the `-oe` flag to tell ezip you want to encrypt. 
 Use the `-f` flag to specify which file.
