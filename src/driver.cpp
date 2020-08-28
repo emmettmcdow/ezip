@@ -55,8 +55,7 @@ int main(int argc, char *argv[]) {
     if (*operation == 'k'){
 
     } else if (*operation == 'b') {
-        parse_file(data_loc);
-        d_and_e(parse_key(key_loc));
+        printf("boof");
     } else if (*operation == 'e') {
         long long cnt = parse_file(data_loc);
         add_metadata(data_mtx, cnt);
@@ -120,6 +119,7 @@ void encrypt(std::string name) {
 
     keygen(name);
     keyexp();
+    print_keys();
     namespace fs = boost::filesystem;
 
     fs::path pth{name};
@@ -162,6 +162,7 @@ void decrypt(std::string name) {
     std::list <Eigen::Matrix<unsigned char, 4, 4>> :: iterator it; 
 
     keyexp();
+    print_keys();
     namespace fs = boost::filesystem;
 
     fs::path pth{name};

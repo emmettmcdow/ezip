@@ -4,6 +4,7 @@
 #include <iterator>
 
 unsigned char rc[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
+extern unsigned int siid;
 
 uint8_t sbox[] =  {
  0x63 ,0x7c ,0x77 ,0x7b ,0xf2 ,0x6b ,0x6f ,0xc5 ,0x30 ,0x01 ,0x67 ,0x2b ,0xfe ,0xd7 ,0xab ,0x76
@@ -26,6 +27,7 @@ uint8_t sbox[] =  {
 unsigned int keys[40];
 unsigned int ogkey[4];
 unsigned int curr_round;
+unsigned int siid = 0;
 std::list <Eigen::Matrix<unsigned char, 4, 4>> data_mtx;
 
 /**
@@ -170,18 +172,18 @@ void print_list(std::list <Eigen::Matrix<unsigned char, 4, 4>> matrix_list) {
  * @param key_loc pointer to the string representing the location of the key
  * @return the processed original key
  */
-unsigned int* parse_key(char* key_loc) {
+void parse_key(char* key_loc) {
     std::fstream ink;
 
     ink.open(key_loc, std::ifstream::in);
     if (ink.fail()) {
         printf("\nFailed to open key\n");
-        return NULL;
+        return;
     }
 
     std::string byte;
     std::string str = "";
-    std::regex valid ("[A-F0-9]*");
+    std::regex valid ("[a-f0-9]*");
     //printf("\n Original Data: \n");
     while(ink.good()) {
         ink >> byte;
@@ -195,17 +197,15 @@ unsigned int* parse_key(char* key_loc) {
 
     if (!std::regex_match(str, valid)) {
         printf("\n INVALID KEY\n");
-        return NULL;
+        return;
     }
 
     unsigned int *newkey = new unsigned int[4];
-    newkey[0] = std::stol(str.substr(0,8), 0, 16);
-    newkey[1] = std::stol(str.substr(8,8), 0, 16);
-    newkey[2] = std::stol(str.substr(16,8), 0, 16);
-    newkey[3] = std::stol(str.substr(24,8), 0, 16);
-    std::cout <<"\n Input Key: "<< newkey[0] << newkey[1] << newkey[2] << newkey[3] << std::endl;
+    ogkey[0] = std::stol(str.substr(0,8), 0, 16);
+    ogkey[1] = std::stol(str.substr(8,8), 0, 16);
+    ogkey[2] = std::stol(str.substr(16,8), 0, 16);
+    ogkey[3] = std::stol(str.substr(24,8), 0, 16);
 
-    return newkey;
 }
 /**
  * Helper function to parse file
@@ -227,13 +227,14 @@ long long parse_file(char *data_loc) {
     int row = 0;
     int col = 0;
     long long count = 0;
-
+    siid = 0;
 
 
     while(true){
         inf.read(&byte, 1);
         if (inf.eof()) break;
         data_mtx.back().array()(row, col) = (unsigned char) byte;
+        siid += byte;
 
         col += 1;
         if (col > 3) {
@@ -327,10 +328,12 @@ unsigned long long parse_metadata() {
  * @param nom name to use for the output file.
  */
 void keygen(std::string nom) {
-    ogkey[0] = 0;
-    ogkey[1] = 0;
-    ogkey[2] = 0;
-    ogkey[3] = 0;
+
+    srand(siid);
+    ogkey[0] = (unsigned int)(std::rand() % 0xFFFFFFFF);
+    ogkey[1] = (unsigned int)(std::rand() % 0xFFFFFFFF);
+    ogkey[2] = (unsigned int)(std::rand() % 0xFFFFFFFF);
+    ogkey[3] = (unsigned int)(std::rand() % 0xFFFFFFFF); 
 
     namespace fs = boost::filesystem;
     fs::path pth{nom};
@@ -339,8 +342,12 @@ void keygen(std::string nom) {
     std::string name = pth.string();
     std::ofstream keyfile(name.append(".key"));
 
+
     // Write to the file
-    keyfile << std::hex << "00000000000000000000000000000000";
+    keyfile << std::setw(8) << std::setfill('0') << std::hex << ogkey[0];
+    keyfile << std::setw(8) << std::setfill('0') << std::hex << ogkey[1];
+    keyfile << std::setw(8) << std::setfill('0') << std::hex << ogkey[2];
+    keyfile << std::setw(8) << std::setfill('0') << std::hex << ogkey[3];
 
     // Close the file
     keyfile.close();
