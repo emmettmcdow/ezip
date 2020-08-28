@@ -1,9 +1,14 @@
 # ezip
-AES Encrypion and Compression 
+AES Encrypion and Compression using gzip. This was a fun project for me, so I would not recommend using it in any professional setting. However it is perfect for learning how the process of encryption works. The majority of the code is commented and I made a pretty low-level write up of the techniques that went into it. Have fun!
 ### Installation
+Firstly install some dependencies. You will need [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page), and [Boost](https://www.boost.org). Also make sure that you can run C++17 and have make, and cmake installed. Then run this
 ```bash
-snowden@NSA:~$ make main
+snowden@NSA:~/ezip$ mkdir build
+snowden@NSA:~/ezip$ cd build
+snowden@NSA:~/ezip/build$ cmake ..
+snowden@NSA:~/ezip/build$ make ..
 ```
+Then you should be able to run ezip from your build folder.
 ### Usage
 Encryption is simple with ezip. Just use the `-oe` flag to tell ezip you want to encrypt. 
 Use the `-f` flag to specify which file.
