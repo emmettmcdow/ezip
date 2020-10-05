@@ -1,5 +1,5 @@
 # ezip
-AES Encrypion and Compression using gzip. This was a fun project for me, so I would not recommend using it in any professional setting. However it is perfect for learning how the process of encryption works. The majority of the code is commented and I made a pretty low-level write up of the techniques that went into it. Have fun!
+AES Encrypion. This was a fun project for me, so I would not recommend using it in any professional setting. However it is perfect for learning how the process of encryption works. The majority of the code is commented and I made a pretty low-level write up of the techniques that went into it. Have fun!
 ### Installation
 Firstly install some dependencies. You will need [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page), and [Boost](https://www.boost.org). Also make sure that you can run C++17 and have make, and cmake installed. Then run this
 ```bash
@@ -63,4 +63,3 @@ SubWord uses the S-box to replace each byte with one from the S-box.For each of 
 with each word of our data. That way different keys result in 
 different cypher text, in addition to the generous mixing and replacing we outlined above.
 ### Key Generation
-### Compression
