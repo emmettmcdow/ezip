@@ -6,7 +6,7 @@ Firstly install some dependencies. You will need [Eigen](http://eigen.tuxfamily.
 snowden@NSA:~/ezip$ mkdir build
 snowden@NSA:~/ezip$ cd build
 snowden@NSA:~/ezip/build$ cmake ..
-snowden@NSA:~/ezip/build$ make .
+snowden@NSA:~/ezip/build$ make 
 ```
 Then you should be able to run ezip from your build folder.
 ### Usage
